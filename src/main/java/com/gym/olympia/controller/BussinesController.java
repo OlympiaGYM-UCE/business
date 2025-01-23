@@ -9,33 +9,33 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/empresas")
+@RequestMapping("/api/bussines")
 public class BussinesController {
 
     @Autowired
     private BussinesService bussinesService;
 
     @GetMapping
-    public List<Bussines> listarTodas() {
-        return bussinesService.listarTodas();
+    public List<Bussines> listAll() {
+        return bussinesService.listAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Bussines> buscarPorId(@PathVariable Long id) {
-        return bussinesService.buscarPorId(id)
+        return bussinesService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Bussines crear(@RequestBody Bussines bussines) {
-        return bussinesService.guardar(bussines);
+    public Bussines create(@RequestBody Bussines bussines) {
+        return bussinesService.save(bussines);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Bussines> actualizar(@PathVariable Long id, @RequestBody Bussines bussines) {
+    public ResponseEntity<Bussines> update(@PathVariable Long id, @RequestBody Bussines bussines) {
         try {
-            Bussines bussinesActualizada = bussinesService.actualizar(id, bussines);
+            Bussines bussinesActualizada = bussinesService.update(id, bussines);
             return ResponseEntity.ok(bussinesActualizada);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -43,8 +43,8 @@ public class BussinesController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        bussinesService.eliminar(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        bussinesService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
