@@ -14,19 +14,19 @@ public class BussinesService {
     @Autowired
     private BussinesRepository bussinesRepository;
 
-    public List<Bussines> listarTodas() {
+    public List<Bussines> listAll() {
         return bussinesRepository.findAll();
     }
 
-    public Optional<Bussines> buscarPorId(Long id) {
+    public Optional<Bussines> findById(Long id) {
         return bussinesRepository.findById(id);
     }
 
-    public Bussines guardar(Bussines bussines) {
+    public Bussines save(Bussines bussines) {
         return bussinesRepository.save(bussines);
     }
 
-    public Bussines actualizar(Long id, Bussines bussines) {
+    public Bussines update(Long id, Bussines bussines) {
         return bussinesRepository.findById(id).map(existingBussines -> {
             existingBussines.setNombre(bussines.getNombre());
             existingBussines.setTelefono(bussines.getTelefono());
@@ -35,7 +35,7 @@ public class BussinesService {
         }).orElseThrow(() -> new RuntimeException("Bussines  dont find with id " + id));
     }
 
-    public void eliminar(Long id) {
+    public void delete(Long id) {
         bussinesRepository.deleteById(id);
     }
 }
