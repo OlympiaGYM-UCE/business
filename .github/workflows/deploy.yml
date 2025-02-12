@@ -1,0 +1,56 @@
+name: Deploy Business to EC2 with Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Build JAR file
+      run: |
+        mvn clean package -DskipTests
+
+    - name: Set up Docker permissions
+      run: |
+        sudo chmod 666 /var/run/docker.sock
+
+    - name: Build Docker Image
+      run: |
+        docker build -t empresa-app:latest .
+        sudo docker save empresa-app:latest > empresa-app.tar
+        sudo chmod 644 empresa-app.tar
+
+    - name: Transfer Docker Image
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.BUSINESS_EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.BUSINESS_EC2_SSH_KEY }}
+        source: empresa-app.tar
+        target: /home/ec2-user/
+
+    - name: SSH to EC2 and Deploy
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.BUSINESS_EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.BUSINESS_EC2_SSH_KEY }}
+        script: |
+          sudo docker load < /home/ec2-user/empresa-app.tar
+          sudo docker stop empresa-app || true
+          sudo docker rm empresa-app || true
+          sudo docker run -d -p 8080:8080 --name empresa-app empresa-app:latest
+          rm /home/ec2-user/empresa-app.tar
